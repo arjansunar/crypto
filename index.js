@@ -2,7 +2,8 @@ const engletters = require("./getCharactersEng")
 const devLetters = require("./getCharacters")
 const letters = engletters + devLetters
 const { map, reverseMap } = require("./getMapTable")
-const { getPaddedText, key, getIndexInKey, skippedChar } = require("./getKeyAndPaddedText");
+const { getPaddedText, getPlayFairKey, getIndexInKey, skippedChar } = require("./getKeyAndPaddedText");
+const { generateRandomString, letters_otp } = require("./getKey_one_time_pad")
 
 const caesar_encrypt = (plainText, key) => {
     const cipher = [];
@@ -36,8 +37,9 @@ const mono_decrypt = (cipherText, reverseMap) => {
     }
     return plainText.join('')
 }
+const playfairKey = getPlayFairKey();
 const playFair_encrypt = (plainText) => {
-    console.log("key:", key)
+    console.log("playfairKey:", playfairKey)
     console.log("escapes character:", skippedChar)
     plainText = plainText.toLowerCase()
     const cipher = []
@@ -48,17 +50,17 @@ const playFair_encrypt = (plainText) => {
             cipher.push(skippedChar)
         }
         else {
-            const [currentRow, currentColumn] = getIndexInKey(digram[0])
-            const [nextRow, nextColumn] = getIndexInKey(digram[1])
+            const [currentRow, currentColumn] = getIndexInKey(digram[0], playfairKey)
+            const [nextRow, nextColumn] = getIndexInKey(digram[1], playfairKey)
             // same row
             if (currentRow === nextRow)
-                cipher.push(key[currentRow][(currentColumn + 1) % 5] + key[nextRow][(nextColumn + 1) % 5])
+                cipher.push(playfairKey[currentRow][(currentColumn + 1) % 5] + playfairKey[nextRow][(nextColumn + 1) % 5])
             // same column
             else if (currentColumn === nextColumn)
-                cipher.push(key[(currentRow + 1) % 5][currentColumn] + key[(nextRow + 1) % 5][nextColumn])
+                cipher.push(playfairKey[(currentRow + 1) % 5][currentColumn] + playfairKey[(nextRow + 1) % 5][nextColumn])
             // different places
             else
-                cipher.push(key[currentRow][nextColumn] + key[nextRow][currentColumn])
+                cipher.push(playfairKey[currentRow][nextColumn] + playfairKey[nextRow][currentColumn])
         }
     }
     return cipher.join("")
@@ -73,37 +75,62 @@ const playFair_decrypt = (cipherText) => {
             plainText.push(skippedChar)
         }
         else {
-            const [currentRow, currentColumn] = getIndexInKey(digram[0])
-            const [nextRow, nextColumn] = getIndexInKey(digram[1])
+            const [currentRow, currentColumn] = getIndexInKey(digram[0], playfairKey)
+            const [nextRow, nextColumn] = getIndexInKey(digram[1], playfairKey)
             // same row
             if (currentRow === nextRow) {
-                const secondCharacter = key[nextRow][(nextColumn - 1 + 5) % 5];
+                const secondCharacter = playfairKey[nextRow][(nextColumn - 1 + 5) % 5];
                 if (secondCharacter !== "x")
-                    plainText.push(key[currentRow][(currentColumn - 1 + 5) % 5] + key[nextRow][(nextColumn - 1 + 5) % 5])
+                    plainText.push(playfairKey[currentRow][(currentColumn - 1 + 5) % 5] + playfairKey[nextRow][(nextColumn - 1 + 5) % 5])
                 else
-                    plainText.push(key[currentRow][currentColumn + 1])
+                    plainText.push(playfairKey[currentRow][currentColumn + 1])
             }
             // same column
             else if (currentColumn === nextColumn) {
-                const secondCharacter = key[(nextRow - 1 + 5) % 5][nextColumn];
+                const secondCharacter = playfairKey[(nextRow - 1 + 5) % 5][nextColumn];
                 if (secondCharacter !== "x")
-                    plainText.push(key[(currentRow - 1 + 5) % 5][currentColumn] + key[(nextRow - 1 + 5) % 5][nextColumn])
+                    plainText.push(playfairKey[(currentRow - 1 + 5) % 5][currentColumn] + playfairKey[(nextRow - 1 + 5) % 5][nextColumn])
                 else
-                    plainText.push(key[(currentRow - 1)][currentColumn])
+                    plainText.push(playfairKey[(currentRow - 1)][currentColumn])
             }
             // different places
             else {
 
-                const secondCharacter = key[nextRow][currentColumn];
+                const secondCharacter = playfairKey[nextRow][currentColumn];
                 if (secondCharacter !== "x")
-                    plainText.push(key[currentRow][nextColumn] + key[nextRow][currentColumn])
+                    plainText.push(playfairKey[currentRow][nextColumn] + playfairKey[nextRow][currentColumn])
                 else
-                    plainText.push(key[currentRow][nextColumn])
+                    plainText.push(playfairKey[currentRow][nextColumn])
             }
         }
     }
     return plainText.join("")
 }
+let one_time_pad_key;
+const one_time_pad_encrypt = (plainText) => {
+    let cipher = []
+    one_time_pad_key = generateRandomString(plainText.length)
+    for (let index in plainText) {
+        if (plainText[index] === ' ' || plainText[index] === '.' || plainText[index] === ',') {
+            cipher.push(plainText[index])
+            continue
+        }
+        cipher.push(letters_otp[(letters_otp.indexOf(plainText[index]) + letters_otp.indexOf(one_time_pad_key[index])) % 26])
+    }
+    return cipher.join('')
+}
+const one_time_pad_decrypt = (cipherText) => {
+    let plainText = []
+    for (let index in cipherText) {
+        if (cipherText[index] === ' ' || cipherText[index] === '.' || cipherText[index] === ',') {
+            plainText.push(cipherText[index])
+            continue
+        }
+        plainText.push(letters_otp[(letters_otp.indexOf(cipherText[index]) - letters_otp.indexOf(one_time_pad_key[index]) + 26) % 26])
+    }
+    return plainText.join('')
+}
+
 
 module.exports = {
     caesar_encrypt,
@@ -113,5 +140,8 @@ module.exports = {
     map,
     reverseMap,
     playFair_encrypt,
-    playFair_decrypt
+    playFair_decrypt,
+    one_time_pad_encrypt,
+    one_time_pad_decrypt
+
 }

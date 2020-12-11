@@ -41,7 +41,6 @@ const getPlayFairKey = () => {
         const keyWord = prompt('keyword: ')
         return createKey(keyWord)
     } else if (newKeyword === 'n') {
-        console.log("Default key: ", defaultKey)
         return defaultKey;
     } else {
         console.log("Enter y or n ")
@@ -80,9 +79,9 @@ const getPaddedText = (plainText) => {
     }
     return paddedText
 }
-const key = getPlayFairKey();
+// const key = getPlayFairKey();
 // gets the index of the given character in the key 
-const getIndexInKey = (character) => {
+const getIndexInKey = (character, key) => {
     const [index] = key.map((innerArr, row) => {
         if (innerArr.includes(character)) return [row, innerArr.indexOf(character)]
         else return null
@@ -90,7 +89,7 @@ const getIndexInKey = (character) => {
     return index
 }
 module.exports = {
-    key,
+    getPlayFairKey,
     getPaddedText,
     getIndexInKey,
     skippedChar
