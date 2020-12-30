@@ -130,7 +130,7 @@ const one_time_pad_decrypt = (cipherText) => {
     }
     return plainText.join('')
 }
-const railFrame_encrypt = (message) => {
+const railFence_encrypt = (message) => {
     message = message.replace(/\s+/g, '')
     const frame1 = []
     const frame2 = []
@@ -140,7 +140,7 @@ const railFrame_encrypt = (message) => {
     }
     return frame1.join('') + frame2.join('')
 }
-const railFrame_decrypt = (cipher) => {
+const railFence_decrypt = (cipher) => {
     const plainText = []
     for (let i = 0; i < Math.round(cipher.length / 2); i++) {
         plainText.push(cipher.charAt(i) + cipher.charAt(i + Math.round(cipher.length / 2)))
@@ -159,6 +159,6 @@ module.exports = {
     playFair_decrypt,
     one_time_pad_encrypt,
     one_time_pad_decrypt,
-    railFrame_encrypt,
-    railFrame_decrypt
+    railFence_encrypt,
+    railFence_decrypt
 }
