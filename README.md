@@ -1,8 +1,8 @@
-#Crypto
+# Crypto
 ---
-##A library that provides functions to implement simple cryptography. 
+## A library that provides functions to implement simple cryptography. 
 
-###Cryptography algorithms provided
+### Cryptography algorithms provided
 
 1. Playfair cipher
 2. One time pad (Vernam cipher)
